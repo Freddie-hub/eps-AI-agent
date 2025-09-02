@@ -3,22 +3,13 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 
-export default function InputBar() {
+export default function InputBar({ onSend }: { onSend: (msg: string) => void }) {
   const [input, setInput] = useState("");
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!input.trim()) return;
-
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: input }),
-    });
-
-    const data = await res.json();
-    console.log("Ollama reply:", data.reply);
-
-    setInput(""); // clear after sending
+    onSend(input);
+    setInput("");
   };
 
   return (

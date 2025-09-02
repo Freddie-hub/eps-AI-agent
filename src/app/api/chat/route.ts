@@ -4,25 +4,28 @@ export async function POST(req: Request) {
   try {
     const { message } = await req.json();
 
-    // Send to local Ollama API
     const response = await fetch("http://localhost:11434/api/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "phi3", // your locally pulled model
-        messages: [
-          { role: "user", content: message }
-        ],
-        stream: false, // set to true if you want streaming responses
+        model: "phi3:mini", // use the smaller variant you pulled
+        messages: [{ role: "user", content: message }],
+        stream: false,
       }),
     });
 
     const data = await response.json();
-    return NextResponse.json({ reply: data.message?.content || "No reply" });
+    console.log("Ollama raw response:", JSON.stringify(data, null, 2));
+
+    const reply =
+      data?.message?.content ||
+      data?.content ||
+      data?.choices?.[0]?.message?.content ||
+      "No reply from model";
+
+    return NextResponse.json({ reply });
   } catch (err) {
-    console.error(err);
+    console.error("Error in /api/chat:", err);
     return NextResponse.json({ error: "Failed to connect to Ollama" }, { status: 500 });
   }
 }
