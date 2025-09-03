@@ -2,14 +2,21 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const { message, files } = await req.json();
 
+    // Build the user content
+    let userContent = message || "";
+    if (files?.length) {
+      userContent += `\n\nAttached files (JSON parsed):\n${JSON.stringify(files, null, 2)}`;
+    }
+
+    // Send to Ollama
     const response = await fetch("http://localhost:11434/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "phi3:mini", // use the smaller variant you pulled
-        messages: [{ role: "user", content: message }],
+        messages: [{ role: "user", content: userContent }],
         stream: false,
       }),
     });
